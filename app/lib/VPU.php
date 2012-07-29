@@ -418,7 +418,7 @@ class VPU {
             $classname = $this->_classname_only($test);
             if (
                 $classname == 'PHPUnit_Framework_TestCase'
-                || stripos($classname, 'test') === false
+                || !is_subclass_of($classname, 'PHPUnit_Framework_TestCase')
             ) {
                 continue;
             }
