@@ -133,16 +133,16 @@ class VPU {
             $char = $str{$i};
 
             if ($char == '"' || $char == "'") {
-              $str_start = $char;
+                $str_start = $char;
               
-              $char = $str{++$i};
-              while ($char != $str_start) {
-                if ($char == "\\") {
-                  $char = $str{++$i};
-                }
-                
                 $char = $str{++$i};
-              }
+                while ($char != $str_start) {
+                    if ($char == "\\") {
+                        $char = $str{++$i};
+                    }
+                
+                    $char = $str{++$i};
+                }
             } elseif ( $char == '{' ) {
                 // Ensure we're only adding events to the array
                 if ( $nest == 0 && substr($str, $i, 8) != '{"event"' ) {
