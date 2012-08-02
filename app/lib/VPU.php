@@ -133,11 +133,12 @@ class VPU {
             $char = $str{$i};
 
             if ($char == '"' || $char == "'") {
+                $str_start_i = $i;
                 $str_start = $char;
                 
                 ++$i;
                 while ($i < $length && $str{$i} != $str_start) {
-                    if ($char == "\\") {
+                    if ($str{$i} == "\\") {
                         ++$i;
                     }
                 
