@@ -1,2 +1,4 @@
 cache/
 app/config/bootstrap.php
+.svn
+**/.svn
