@@ -1,7 +1,7 @@
 <?php
 
 $root = dirname(dirname(__DIR__));
-$piwik_root = dirname(dirname($root));
+$piwik_root = dirname(dirname(dirname($root)));
 
 $config = array(
     /* Required */
@@ -58,12 +58,13 @@ $config = array(
     //
     // In order for VPU to function correctly, the configuration file must
     // contain a JSON listener (see the README for more information)
-    'xml_configuration_file' => "{$piwik_root}/tests/PHPUnit/phpunit.xml",
+    'xml_configuration_file' =>  '', #"{$piwik_root}/tests/PHPUnit/phpunit.xml",
     //'xml_configuration_file' => "{$root}/app/config/phpunit.xml",
 
     // Paths to any necessary bootstraps
     'bootstraps' => array(
-        "{$piwik_root}/tests/PHPUnit/bootstrap.php"
+        "{$piwik_root}/tests/PHPUnit/bootstrap.php",
+        "{$piwik_root}/libs/Event/Dispatcher.php"
     )
 );
 
@@ -85,9 +86,8 @@ spl_autoload_register(function($class) use ($root) {
 });
 
 foreach ( $config['bootstraps'] as $bootstrap ) {
-    require $bootstrap;
+    require_once $bootstrap;
 }
 
 \app\lib\Library::store($config);
-
 ?>
