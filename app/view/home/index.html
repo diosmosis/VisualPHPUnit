@@ -300,39 +300,103 @@
     <script>
       $(document).ready(function() {
 
+        var $file_selector = $('.file-selector');
+        var expandFileSet = function(fileset, callback, result) { // not very efficient...
+          if (typeof result === 'undefined') {
+            result = {};
+          }
+          
+          var waiting = 0, i = 0;
+          var done = function(result) {
+            if (waiting == 0 && i == fileset.length) {
+              arrayResult = []
+              for (var key in result) {
+                arrayResult.push(key);
+              }
+              
+              callback(arrayResult);
+            }
+          };
+          
+          // create a list of test files to run
+          for (i = 0; i != fileset.length; ++i) {
+            var file = fileset[i];
+            
+            // if ends with .php
+            if (file.length > 4 && file.substr(file.length - 4, 4) == '.php') {
+              result[file] = true;
+            } else {
+              var $entry = $('a[data-path="'+file+'"]', $file_selector),
+                  $parent = $entry.parent();
+              
+              // if a directory, and not the .svn dir 
+              if ($parent.hasClass('directory') && file.indexOf('.svn') == -1) {
+                ++waiting;
+                
+                // if it hasn't been loaded, load it
+                if ($parent.find('ul').length == 0) {
+                  $entry.fileSelector('expand', false, function(contents) {
+                    expandFileSet(contents, function(r) {
+                      --waiting;
+                      done(result); // r will be an array, so don't use that.
+                    }, result);
+                  });
+                } else {
+                  var contents = [];
+                  // TODO: above selector can be avoided since we know the element here
+                  $('ul a', $parent).each(function() {
+                    contents.push($(this).attr('data-path'));
+                  });
+                  
+                  expandFileSet(contents, function(r) {
+                    --waiting;
+                    done(result);
+                  }, result);
+                }
+              }
+            }
+          }
+          
+          done(result);
+        };
+          
         $('#run-tests').click(function(event) {
           var $form = $(this).closest('form'),
               $output = $('#test-output');
-
+          
           event.preventDefault();
 
           $output.fadeOut(300, function() {
             $output.html(
               "<div class='loader'><img src='./img/ajax-loader.gif'></div>"
             ).fadeIn(300);
+            
+            var file_selections = $('#test-files').val().split('|');
+            expandFileSet(file_selections, function (test_files) {
+              // run the test for each file individually, so we can see the progress being made TODO
+              $.post($form.attr('action'), $form.serialize(), function(response) {
+                var template = $("#test-results").html();
 
-            $.post($form.attr('action'), $form.serialize(), function(response) {
-              var template = $("#test-results").html();
+                response = $.parseJSON(response);
 
-              response = $.parseJSON(response);
+                $output.fadeOut(300, function() {
+                  $output.html(_.template(template, {
+                    errors: response.errors,
+                    notifications: response.notifications,
+                    suites: response.suites,
+                    stats: response.stats
+                  }));
 
-              $output.fadeOut(300, function() {
-                $output.html(_.template(template, {
-                  errors: response.errors,
-                  notifications: response.notifications,
-                  suites: response.suites,
-                  stats: response.stats
-                }));
+                  $('#sort').triggerHandler('change');
 
-                $('#sort').triggerHandler('change');
-
-                $output.fadeIn(300, function() {
-                  $('.display-suite').each(function(index, element) {
-                    $(element).triggerHandler('click');
+                  $output.fadeIn(300, function() {
+                    $('.display-suite').each(function(index, element) {
+                      $(element).triggerHandler('click');
+                    });
                   });
                 });
-              });
 
+              });
             });
           });
 
