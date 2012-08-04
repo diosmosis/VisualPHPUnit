@@ -368,7 +368,7 @@
 
           $output.fadeOut(300, function() {
             $output.html(
-              "<div class='loader'><img src='./img/ajax-loader.gif'></div>"
+              "<div class='loader'><img src='./img/ajax-loader.gif'><h2 id='currently-running'></h2><div id='fatal-test-error' class='alert alert-danger' style='display:none;'><strong>Invalid response sent from server:</strong><br><br><pre> </pre></div></div>"
             ).fadeIn(300);
             
             var file_selections = $('#test-files').val().split('|');
@@ -411,10 +411,25 @@
                   return;
                 }
                 
-                // TODO: UI: Running test.
+                // update 'currently running' text
+                var lastSlash = test_files[testIdx].lastIndexOf('/');
+                if (lastSlash === -1) {
+                  lastSlash = test_files[testIdx].lastIndex('\\');
+                }
+                var testShortName = test_files[testIdx].substr(lastSlash + 1);
+                
+                $('#currently-running').text("Currently running " + testShortName + '...');
+                
+                // run test
                 baseReqData.test_files = test_files[testIdx];
                 $.post($form.attr('action'), baseReqData, function(response) {
-                  response = $.parseJSON(response); // TODO: error if can't parse
+                  try {
+                    response = $.parseJSON(response);
+                  } catch (e) {
+                    $('#fatal-test-error pre').text(response);
+                    $('#fatal-test-error').show();
+                    return;
+                  }
                   
                   allResults.errors.push.apply(allResults.errors, response.errors);
                   allResults.notifications.push.apply(allResults.notifications, response.notifications);
