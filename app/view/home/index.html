@@ -441,10 +441,10 @@
                     
                     // recalculate percentages
                     var total = allResults.stats[key].total;
-                    allResults.stats[key].percentFailed = allResults.stats[key].failed / total;
-                    allResults.stats[key].percentIncomplete = allResults.stats[key].incomplete / total;
-                    allResults.stats[key].percentSkipped = allResults.stats[key].skipped / total;
-                    allResults.stats[key].percentSucceeded = allResults.stats[key].succeeded / total;
+                    allResults.stats[key].percentFailed = (allResults.stats[key].failed / total) * 100;
+                    allResults.stats[key].percentIncomplete = (allResults.stats[key].incomplete / total) * 100;
+                    allResults.stats[key].percentSkipped = (allResults.stats[key].skipped / total) * 100;
+                    allResults.stats[key].percentSucceeded = (allResults.stats[key].succeeded / total) * 100;
                   }
                   
                   runTest(testIdx + 1, callback);
