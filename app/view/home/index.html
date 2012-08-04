@@ -174,54 +174,6 @@
     <script src='./js/bootstrap-alert.js'></script>
 
     <script type='text/html' id='test-results'>
-      <% _.each(notifications, function(notification) { %>
-        <div class="alert alert-block alert-<%= notification.type %>">
-          <button type="button" class="close" data-dismiss="alert">×</button>
-          <h4 class="alert-heading"><%= notification.title %></h4>
-          <p class='notification-message'><%= notification.message %></p>
-        </div>
-      <% }) %>
-
-      <% _.each(suites, function(suite) { %>
-        <div class='suite' data-suite-status='<%= suite.status %>' data-suite-time='<%= suite.time %>'>
-          <% var statusCap = suite.status.charAt(0).toUpperCase() + suite.status.slice(1); %>
-          <h3><%= suite.name %></h3>
-          <div class='suite-status'>
-            <span class="label label-<%= suite.status %>"><%= statusCap %></span>
-          </div>
-
-          <% _.each(suite.tests, function(test) { %>
-            <div class="alert alert-block alert-<%= test.status %>">
-              <h4 class="alert-heading"><%= test.name %></h4>
-              <% if ( test.message) { %>
-              <p class='test-message'>
-                <strong><%= test.message %></strong>
-              </p>
-              <% } %>
-              <ul class='nav'>
-                <li class='test-details'>
-                  <em>Execution time:</em>
-                  <%= test.time %>s
-                </li>
-                <% if ( test.output ) { %>
-                <li class='test-details'>
-                  <em>Debug Output:</em>
-                  <pre><%= test.output %></pre>
-                </li>
-                <% } %>
-                <% if ( test.trace ) { %>
-                <li class='test-details'>
-                  <em>Stack Trace:</em>
-                  <pre><%= test.trace %></pre>
-                </li>
-                <% } %>
-              </ul>
-            </div>
-          <% }) %>
-        </div>
-
-      <% }) %>
-
       <div class='row statistics'>
         <div class='span4'>
           <h3>Suite Statistics</h3>
@@ -293,6 +245,54 @@
             </li>
           </ul>
         </div>
+      <% }) %>
+
+      <% _.each(notifications, function(notification) { %>
+        <div class="alert alert-block alert-<%= notification.type %>">
+          <button type="button" class="close" data-dismiss="alert">×</button>
+          <h4 class="alert-heading"><%= notification.title %></h4>
+          <p class='notification-message'><%= notification.message %></p>
+        </div>
+      <% }) %>
+
+      <% _.each(suites, function(suite) { %>
+        <div class='suite' data-suite-status='<%= suite.status %>' data-suite-time='<%= suite.time %>'>
+          <% var statusCap = suite.status.charAt(0).toUpperCase() + suite.status.slice(1); %>
+          <h3><%= suite.name %></h3>
+          <div class='suite-status'>
+            <span class="label label-<%= suite.status %>"><%= statusCap %></span>
+          </div>
+
+          <% _.each(suite.tests, function(test) { %>
+            <div class="alert alert-block alert-<%= test.status %>">
+              <h4 class="alert-heading"><%= test.name %></h4>
+              <% if ( test.message) { %>
+              <p class='test-message'>
+                <strong><%= test.message %></strong>
+              </p>
+              <% } %>
+              <ul class='nav'>
+                <li class='test-details'>
+                  <em>Execution time:</em>
+                  <%= test.time %>s
+                </li>
+                <% if ( test.output ) { %>
+                <li class='test-details'>
+                  <em>Debug Output:</em>
+                  <pre><%= test.output %></pre>
+                </li>
+                <% } %>
+                <% if ( test.trace ) { %>
+                <li class='test-details'>
+                  <em>Stack Trace:</em>
+                  <pre><%= test.trace %></pre>
+                </li>
+                <% } %>
+              </ul>
+            </div>
+          <% }) %>
+        </div>
+
       <% }) %>
 
     </script>
