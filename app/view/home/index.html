@@ -440,7 +440,7 @@
                     allResults.stats[key].total += response.stats[key].total;
                     
                     // recalculate percentages
-                    var total = allResults.stats.total;
+                    var total = allResults.stats[key].total;
                     allResults.stats[key].percentFailed = allResults.stats[key].failed / total;
                     allResults.stats[key].percentIncomplete = allResults.stats[key].incomplete / total;
                     allResults.stats[key].percentSkipped = allResults.stats[key].skipped / total;
