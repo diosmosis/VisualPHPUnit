@@ -373,18 +373,93 @@
             
             var file_selections = $('#test-files').val().split('|');
             expandFileSet(file_selections, function (test_files) {
-              // run the test for each file individually, so we can see the progress being made TODO
-              $.post($form.attr('action'), $form.serialize(), function(response) {
+              var allResults = {
+                errors: [],
+                notifications: [],
+                suites: {},
+                stats: {
+                  suites: {
+	                  succeeded: 0,
+                    skipped: 0,
+                    incomplete: 0,
+                    failed: 0,
+                    total: 0
+                  },
+                  tests: {
+	                  succeeded: 0,
+                    skipped: 0,
+                    incomplete: 0,
+                    failed: 0,
+                    total: 0
+                  }
+                }
+              };
+              
+              var baseReqData = {};
+              $.each($form.serializeArray(), function(_, kv) {
+                if (baseReqData.hasOwnProperty(kv.name)) {
+                  baseReqData[kv.name] = $.makeArray(baseReqData[kv.name]);
+                  baseReqData[kv.name].push(kv.value);
+                } else {
+                  baseReqData[kv.name] = kv.value;
+                }
+              });
+              
+              function runTest(testIdx, callback) {
+                if (testIdx >= test_files.length) {
+                  callback();
+                  return;
+                }
+                
+                // TODO: UI: Running test.
+                baseReqData.test_files = test_files[testIdx];
+                $.post($form.attr('action'), baseReqData, function(response) {
+                  response = $.parseJSON(response); // TODO: error if can't parse
+                  
+                  allResults.errors.push.apply(allResults.errors, response.errors);
+                  allResults.notifications.push.apply(allResults.notifications, response.notifications);
+                  
+                  for (var key in response.suites) {
+                    if (key == ':') {
+                      if (response.suites[key].status != 'succeeded') {
+                        allResults.suites[key].status = response.suites[key].status;
+                      }
+                      
+                      allResults.suites[key].tests.push(allResults.suites[key].tests, response.suites[key].tests);
+                      allResults.suites[key].time += response.suites[key].time;
+                    } else {
+                      allResults.suites[key] = response.suites[key];
+                    }
+                  }
+                  
+                  for (var key in allResults.stats) {
+                    allResults.stats[key].succeeded += response.stats[key].succeeded;
+                    allResults.stats[key].skipped += response.stats[key].skipped;
+                    allResults.stats[key].incomplete += response.stats[key].incomplete;
+                    allResults.stats[key].failed += response.stats[key].failed;
+                    allResults.stats[key].total += response.stats[key].total;
+                    
+                    // recalculate percentages
+                    var total = allResults.stats.total;
+                    allResults.stats[key].percentFailed = allResults.stats[key].failed / total;
+                    allResults.stats[key].percentIncomplete = allResults.stats[key].incomplete / total;
+                    allResults.stats[key].percentSkipped = allResults.stats[key].skipped / total;
+                    allResults.stats[key].percentSucceeded = allResults.stats[key].succeeded / total;
+                  }
+                  
+                  runTest(testIdx + 1, callback);
+                });
+              }
+              
+              runTest(0, function() {
                 var template = $("#test-results").html();
-
-                response = $.parseJSON(response);
 
                 $output.fadeOut(300, function() {
                   $output.html(_.template(template, {
-                    errors: response.errors,
-                    notifications: response.notifications,
-                    suites: response.suites,
-                    stats: response.stats
+                    errors: allResults.errors,
+                    notifications: allResults.notifications,
+                    suites: allResults.suites,
+                    stats: allResults.stats
                   }));
 
                   $('#sort').triggerHandler('change');
@@ -395,7 +470,6 @@
                     });
                   });
                 });
-
               });
             });
           });
