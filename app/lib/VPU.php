@@ -9,7 +9,7 @@ class VPU_Log_JSON extends \PHPUnit_Util_Log_JSON {
           parent::writeCase($status, $time, $trace, $message, $test);
         } else {
           foreach ($test->tests() as $case) {
-            parent::writeCase($status, $time, $trace, $message, $case);
+            $this->writeCase($status, $time, $trace, $message, $case);
           }
         }
     }
